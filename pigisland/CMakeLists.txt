@@ -17,7 +17,7 @@ add_executable(pigisland
   src/kmint/pigisland/resources.cpp
   src/kmint/pigisland/shark.cpp
   src/kmint/pigisland/boat.cpp
-  src/kmint/pigisland/pig.cpp)
+  src/kmint/pigisland/pig.cpp "include/stud_lib_kmint/a_star/a_star.hpp" "src/stud_lib_kmint/a_star/a_star.cpp" "include/stud_lib_kmint/a_star/heuristics.hpp" "src/stud_lib_kmint/a_star/heuristics.cpp")
 
 target_compile_features(pigisland PUBLIC cxx_std_17)
 target_link_libraries(pigisland PRIVATE kmint)
