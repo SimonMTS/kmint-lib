@@ -12,12 +12,14 @@ endif()
 
   
 add_executable(pigisland
-  src/kmint/pigisland/main.cpp
-  src/kmint/pigisland/node_algorithm.cpp
-  src/kmint/pigisland/resources.cpp
-  src/kmint/pigisland/shark.cpp
-  src/kmint/pigisland/boat.cpp
-  src/kmint/pigisland/pig.cpp "include/stud_lib_kmint/a_star/a_star.hpp" "src/stud_lib_kmint/a_star/a_star.cpp" "include/stud_lib_kmint/a_star/heuristics.hpp" "src/stud_lib_kmint/a_star/heuristics.cpp")
+  src/pigisland/main.cpp
+  src/pigisland/node_algorithm.cpp
+  src/pigisland/resources.cpp
+  src/pigisland/shark.cpp
+  src/pigisland/boat.cpp
+  src/pigisland/pig.cpp
+  src/stud_lib_kmint/a_star/a_star.cpp
+  src/stud_lib_kmint/a_star/heuristics.cpp)
 
 target_compile_features(pigisland PUBLIC cxx_std_17)
 target_link_libraries(pigisland PRIVATE kmint)
