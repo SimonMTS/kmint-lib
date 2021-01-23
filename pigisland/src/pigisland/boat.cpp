@@ -15,13 +15,15 @@ boat::boat(map::map_graph& g, map::map_node& initial_node)
 void boat::act(delta_time dt) {
     t_passed_ += dt;
     if (to_seconds(t_passed_) >= 1) {
-        auto& harbor = find_random_mooring_place(graph_);
+        auto& harbor = graph_[500];  // find_random_mooring_place(graph_);
 
         stud_lib_kmint::node_list path = stud_lib_kmint::a_star::find_path(
             node(), harbor, graph_,
             stud_lib_kmint::heuristics::manhattan_distance);
 
-        this->node(path[0].get());
+        if (path.size() >= 2) {
+            this->node(path[path.size() - 2].get());  // graph_[300]
+        }
         t_passed_ = from_seconds(0);
     }
 }
