@@ -6,83 +6,72 @@ namespace stud_lib_kmint {
 
 node_list a_star::find_path(map_node& start, const map_node& end,
                             map_graph& graph, const heuristic& heuristic) {
-    graph.untag_all();
-
-    map<int, pair<int, int>> weights;  // nodeID, weight, parentID
+    map<int, stud_lib_kmint::weights_and_parent> weights;
     for (auto& node : graph) {
-        int w = node.node_id() == start.node_id()
-                    ? 0
-                    : std::numeric_limits<int>::max();
-
-        weights[node.node_id()] = {w, -1};  // std::make_pair<int, int>(w, -1);
+        weights[node.node_id()] = {};
+        weights[node.node_id()].h = std::numeric_limits<int>::max();
+        weights[node.node_id()].f = std::numeric_limits<int>::max();
+        weights[node.node_id()].parent = -1;
     }
-
-    // final path
-    node_list path;
-
-    // closed list
-    vector<int> closed_list;
 
     // open list
     node_priority_queue open_list(
         [&weights](const map_node& lhs, const map_node& rhs) {
-            return weights[lhs.node_id()].first > weights[rhs.node_id()].first;
+            if (weights[lhs.node_id()].f == weights[rhs.node_id()].f) {
+                return weights[lhs.node_id()].h > weights[rhs.node_id()].h;
+            } else {
+                return weights[lhs.node_id()].f > weights[rhs.node_id()].f;
+            }
         });
+    weights[start.node_id()].f = 0;
     open_list.push(start);
-    // weights[start.node_id()].first = 0;
 
     // loop over open list
     while (!open_list.empty()) {
-        map_node& shortest = open_list.top();
+        map_node& lowest_f = open_list.top();
         open_list.pop();
-        closed_list.push_back(shortest.node_id());
 
-        for (auto& edge : shortest) {
-            // if not closed
-            if (std::find(closed_list.begin(), closed_list.end(),
-                          edge.to().node_id()) == closed_list.end()) {
-                // tag as visited
-                edge.to().tag(node_tag::visited);
+        // if reached end
+        if (lowest_f.node_id() == end.node_id()) {
+            // trace back
+            node_list path;
 
-                // aka G
-                int weight_up_to_this_node =
-                    weights.at(shortest.node_id()).first +
-                    (edge.weight() == 1 ? 1 : 4);  // complete avoidance test
-                // aka H
-                int estimate_weight_to_end = heuristic(edge.to(), end);
-                // aka F
-                int estimated_total_weight_to_end =
-                    weight_up_to_this_node + estimate_weight_to_end;
+            reference_wrapper<map_node> parent = graph[end.node_id()];
+            parent.get().tag(node_tag::path);
+            path.push_back(parent);
 
-                if (estimated_total_weight_to_end <
-                    weights.at(edge.to().node_id()).first) {
-                    open_list.push(edge.to());
-                    weights[edge.to().node_id()].first =
-                        estimated_total_weight_to_end;
-                    weights[edge.to().node_id()].second = shortest.node_id();
-                }
-            }
-
-            // if reached end
-            if (edge.to().node_id() == end.node_id()) {
-                // trace back
-                reference_wrapper<map_node> parent = graph[end.node_id()];
+            while (weights.at(parent.get().node_id()).parent != -1) {
+                parent = graph[weights.at(parent.get().node_id()).parent];
                 parent.get().tag(node_tag::path);
                 path.push_back(parent);
+            }
 
-                while (weights.at(parent.get().node_id()).second != -1) {
-                    parent = graph[weights.at(parent.get().node_id()).second];
-                    parent.get().tag(node_tag::path);
-                    path.push_back(parent);
-                }
+            return path;
+        }
 
-                return path;
+        for (auto& edge : lowest_f) {
+            auto& neighbor = edge.to();
+            neighbor.tag(node_tag::visited);
+
+            int neighbor_weight = edge.weight();
+            // for complete avoidance
+            // neighbor_weight = (neighbor_weight == 1 ? 1 : 1000);
+
+            int tentative_g = weights[lowest_f.node_id()].f + neighbor_weight;
+            int tentative_h = heuristic(neighbor, end);
+            int tentative_f = tentative_g + tentative_h;
+            if (tentative_f < weights[neighbor.node_id()].f) {
+                weights[neighbor.node_id()].h = tentative_h;
+                weights[neighbor.node_id()].f = tentative_f;
+                weights[neighbor.node_id()].parent = lowest_f.node_id();
+
+                open_list.push(neighbor);
             }
         }
     }
 
     throw std::runtime_error("no path found");
-    return path;
+    return node_list{};
 }
 
 }  // namespace stud_lib_kmint

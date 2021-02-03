@@ -17,9 +17,10 @@ void boat::act(delta_time dt) {
     if (to_seconds(t_passed_) >= 1) {
         auto& harbor = graph_[500];  // find_random_mooring_place(graph_);
 
+        graph_.untag_all();
         stud_lib_kmint::node_list path = stud_lib_kmint::a_star::find_path(
             node(), harbor, graph_,
-            stud_lib_kmint::heuristics::manhattan_distance);
+            stud_lib_kmint::heuristics::euclidean_distance);
 
         if (path.size() >= 2) {
             this->node(path[path.size() - 2].get());  // graph_[300]

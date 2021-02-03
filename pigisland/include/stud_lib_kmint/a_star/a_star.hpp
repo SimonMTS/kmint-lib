@@ -23,6 +23,13 @@ using node_priority_queue =
     std::priority_queue<std::reference_wrapper<map_node>, node_list,
                         std::function<bool(const map_node&, const map_node&)>>;
 
+struct weights_and_parent {
+    int g, h, f, parent;
+    weights_and_parent() : g(0), h(0), f(0), parent(-1) {}
+    weights_and_parent(int g_, int h_, int f_, int parent_)
+        : g(g_), h(h_), f(f_), parent(parent_) {}
+};
+
 class a_star {
    public:
     static node_list find_path(map_node& start, const map_node& end,
